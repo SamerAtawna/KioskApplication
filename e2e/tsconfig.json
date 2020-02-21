@@ -9,5 +9,6 @@
       "jasminewd2",
       "node"
     ]
-  }
+  },
+  "emitDecoratorMetadata": true
 }

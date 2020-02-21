@@ -1,0 +1,387 @@
+<div class="container slide-in-elliptic-top-fwd" appNoRightClick>
+  <div class="header">
+    <mat-card>
+      <button mat-raised-button (click)="reloadWindow()" color="primary">
+        מסעדות
+      </button>
+    </mat-card>
+  </div>
+  <mat-horizontal-stepper
+    dir="rtl"
+    (selectionChange)="changed($event, additionStep)"
+    linear
+    #stepper
+  >
+    <mat-step completed="false">
+      <ng-template matStepLabel>בחירת מנה</ng-template>
+      <div class="menuContainer">
+        <mat-card *ngFor="let item of menu; let i = index">
+          <img
+            [lazyLoad]="picServer + item.pic"
+            [defaultImage]="defaultImage"
+          />
+          <img src="../../../assets/zoom.png" class="zoom" (click)="open(i)" />
+          <div
+            class="clickArea"
+            (click)="
+              enableAdditionals(
+                stepper,
+                item.prodid,
+                item.Alias,
+                item.numOfAdditions,
+                item.numOfFirstMeal,
+                item.numOfMeal,
+                item.numOfSauce,
+                item.numOfBread,
+                item.numOfExtra,
+                item.additionMessage
+              )
+            "
+          ></div>
+          <div
+            class="badge"
+            *ngIf="item.PopMessage"
+            [innerHtml]="item.PopMessage"
+          ></div>
+          <div
+            class="badge2"
+            *ngIf="item.PopMessage2"
+            [innerHtml]="item.PopMessage2"
+          ></div>
+          <mat-card-header>
+            <mat-card-title>{{ item.name[0] | removeNumber }}</mat-card-title>
+            <mat-card-subtitle
+              [innerHTML]="item.Description | newLine"
+            ></mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="priceC">
+              <div class="price">
+                {{ item.Price }}
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-step>
+    <mat-step completed="false" #additionStep>
+      <ng-template matStepLabel>תוספות</ng-template>
+      <mat-list>
+        <!-- List of additionals -->
+
+        <div class="additions" *ngIf="additionals.additions.length >= 1">
+          <div class="additionTitle">
+            יש לבחור {{ additionals.numberOfAdditions }} תוספות
+            <span *ngIf="additionMsg">{{ additionMsg }}</span>
+          </div>
+          <div class="additionsList">
+            <mat-selection-list
+              class="additionslst"
+              (selectionChange)="updateBasket($event)"
+              #ch
+            >
+              <mat-list-option
+                #chh
+                *ngFor="let item of additionals.additions"
+                [disabled]="
+                  selectedCount.additionals >= additionals.numberOfAdditions &&
+                  !chh.selected
+                "
+                (click)="
+                  updateSelectedCount(ch.selectedOptions.selected.length)
+                "
+                color="primary"
+                value="{{ item.addition }}"
+              >
+                <div class="tt">
+                  <div>{{ item.name | removeNumber }}</div>
+                  <div>
+                    <img
+                      class="additionPic"
+                      [lazyLoad]="picServer + item.Image"
+                      [defaultImage]="defaultImage"
+                    />
+                  </div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+        <!-- List of Extra additionals -->
+
+        <div class="additions" *ngIf="additionals.extraAdditions.length >= 1">
+          <div class="additionTitle">
+            יש לבחור {{ additionals.numOfExtraAdditionals }} תוספות בצד
+          </div>
+          <div class="additionsList">
+            <mat-selection-list
+              class="additionslst"
+              (selectionChange)="updateBasket($event)"
+              #ch
+            >
+              <mat-list-option
+                #chh
+                *ngFor="let item of additionals.extraAdditions"
+                [disabled]="
+                  selectedCount.extraAdditions >=
+                    additionals.numOfExtraAdditionals && !chh.selected
+                "
+                (click)="
+                  updateSelectedCountExtra(ch.selectedOptions.selected.length)
+                "
+                color="primary"
+                value="{{ item.addition }}_extra"
+              >
+                <div class="tt">
+                  <div>{{ item.name | removeNumber }}</div>
+                  <div>
+                    <img
+                      class="additionPic"
+                      [lazyLoad]="picServer + item.Image"
+                      [defaultImage]="defaultImage"
+                    />
+                  </div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+
+        <!-- List of Souce -->
+
+        <div class="additions" *ngIf="additionals.souces.length >= 1">
+          <div class="additionTitle">
+            רטבים
+          </div>
+          <div class="">
+            <mat-selection-list (selectionChange)="updateBasket($event)" #chaq>
+              <mat-list-option
+                #chha
+                *ngFor="let item of additionals.souces"
+                [disabled]="
+                  selectedCount.sauce >= additionals.numOfSauce &&
+                  !chha.selected
+                "
+                (click)="
+                  updateSelectedCountSauce(chaq.selectedOptions.selected.length)
+                "
+                color="primary"
+                value="{{ item.addition }}"
+              >
+                <div class="tt">
+                  <div>{{ item.name }}</div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+
+        <!-- List of Favorites -->
+        <div class="additions fav" *ngIf="additionals.favorites.length >= 1">
+          <div class="additionTitle">
+            העדפות
+          </div>
+          <div class="favHeight">
+            <mat-selection-list (selectionChange)="updateBasket($event)">
+              <mat-list-option
+                [ngClass]="{ animFav: opt.selected }"
+                *ngFor="let item of additionals.favorites"
+                color="primary"
+                value="{{ item.addition }}"
+                (click)="doo(opt)"
+                #opt
+              >
+                <div class="tt imgFix">
+                  <div><img src="../../../assets/{{ item.Image }}" /></div>
+                  <div>{{ item.name }}</div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+        </div>
+
+        <!-- list of firstmeal -->
+        <div class="additions" *ngIf="additionals.firstMeal.length >= 1">
+          <div class="additionTitle">
+            מנה ראשונה
+          </div>
+          <div class="">
+            <mat-selection-list (selectionChange)="updateBasket($event)" #ch>
+              <mat-list-option
+                #chh
+                *ngFor="let item of additionals.firstMeal"
+                [disabled]="
+                  selectedCount.firstMeal >= additionals.numOfFirstMeal &&
+                  !chh.selected
+                "
+                (click)="
+                  updateSelectedCountFirstMeal(
+                    ch.selectedOptions.selected.length
+                  )
+                "
+                color="primary"
+                value="{{ item.addition }}"
+              >
+                <div class="tt">
+                  <div>{{ item.name }}</div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+        <!-- list of Bread -->
+        <mat-divider></mat-divider>
+        <div class="additions" *ngIf="additionals.isBread.length >= 1">
+          <div class="additionTitle">
+            אפשרויות לחם
+          </div>
+          <div class="brd">
+            <mat-selection-list (selectionChange)="updateBasket($event)" #ch>
+              <mat-list-option
+                #chh
+                *ngFor="let item of additionals.isBread"
+                [disabled]="
+                  selectedCount.bread >= additionals.numOfBread && !chh.selected
+                "
+                (click)="
+                  updateSelectedCountBread(ch.selectedOptions.selected.length)
+                "
+                color="primary"
+                value="{{ item.addition }}"
+              >
+                <div class="tt">
+                  <div>{{ item.name }}</div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+
+        <!-- List of Major Meal -->
+        <div class="additions" *ngIf="additionals.isMeal.length > 1">
+          <div class="additionTitle">
+            יש לבחור מנה עיקרית
+          </div>
+          <div class="additionsList">
+            <mat-selection-list
+              (selectionChange)="updateBasket($event)"
+              class="additionslst"
+              #ch
+            >
+              <mat-list-option
+                #chh
+                *ngFor="let item of additionals.isMeal"
+                [disabled]="
+                  selectedCount.meal >= additionals.numOfMeal && !chh.selected
+                "
+                (click)="
+                  updateSelectedCountMeal(ch.selectedOptions.selected.length)
+                "
+                color="primary"
+                value="{{ item.addition }}"
+              >
+                <div class="tt">
+                  <div>{{ item.name }}</div>
+                  <div>
+                    <img
+                      class="additionPic"
+                      [lazyLoad]="picServer + item.pic"
+                      [defaultImage]="defaultImage"
+                    />
+                  </div>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </div>
+        </div>
+        <div class="additions fav">
+          <div class="additionTitle">
+          הגשה - בקרוב!
+          </div>
+
+          <mat-radio-group color="primary" aria-label="Select an option" class="taOptions" (change)="setTA($event)" disabled>
+            <div><mat-radio-button value="1" checked >לשבת</mat-radio-button></div>
+
+            <div><mat-radio-button value="2">לקחת</mat-radio-button></div>
+          </mat-radio-group>
+        </div>
+      </mat-list>
+      <div class="btnBar">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="enablePayment(stepper)"
+        >
+          המשך
+        </button>
+      </div>
+    </mat-step>
+    <mat-step completed="false" #payStep [editable]="paymentEnabled">
+      <ng-template matStepLabel>תשלום</ng-template>
+      <div class="payment">
+        <div class="gb">
+          <div class="isscard  z-depth-2" (click)="openDialog('GB')">
+            <!--Green Badge -->
+            <div class="content">
+              <div class="titlewww">
+                <b class="bb">כרטיס קבלן</b><br />אינטל קרית גת
+              </div>
+              <div class="titlewww2">
+                <div class="bottomcode">
+                  12345-1234
+                  <br />
+                  <div class="blackbar"></div>
+                </div>
+                <div class="isslogo">
+                  <img src="../../../assets/iss-logo-large.png" />CATERING
+                  SERVICES
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bb">
+          <div class="blueBadge" (click)="openDialog('BB')">
+            <div class="intelLogo"><img src="../../../assets/intel.jpg" /></div>
+            <div class="human"><img src="../../../assets/user.png" /></div>
+            <div class="badgeInput"></div>
+          </div>
+        </div>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+  <mat-card class="basket">
+    <div class="basketItems" *ngIf="basket" dir="rtl">
+      <div class="choosenMeal">
+        {{ basket.mealName }}
+      </div>
+      <div class="arrow" *ngIf="basket.ingredients">
+        <!-- <img src="../../../assets/arr.png" /> -->
+        <hr />
+      </div>
+      <div class="choosenIngredients">
+        <ul>
+          <li *ngFor="let item of basket.ingredients">{{ item.name }}</li>
+        </ul>
+      </div>
+    </div>
+    <img src="../../../assets/cart.png" />
+  </mat-card>
+  <div class="about">Samer Alataona (c) {{year}} v2.1<br><code>Last Update: {{lastUpdate}}</code></div>
+</div>
+
+<ngx-spinner
+  bdOpacity="0.9"
+  bdColor="#333"
+  size="large"
+  color="#fff"
+  type="timer"
+  [fullScreen]="true"
+>
+  <p style="color: white">נא להמתין</p>
+</ngx-spinner>

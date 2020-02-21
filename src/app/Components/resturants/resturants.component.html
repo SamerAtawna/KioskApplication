@@ -1,0 +1,30 @@
+<div class="container" appNoRightClick>
+    <ngx-spinner
+    bdOpacity="0.9"
+    bdColor="#333"
+    size="large"
+    color="#fff"
+    type="timer"
+    [fullScreen]="true"
+  >
+    <p style="color: white">נא להמתין</p>
+  </ngx-spinner>
+  <div class="title"><h1>?איפה תרצו לאכול היום</h1></div>
+  <div class="message" *ngIf="message"></div>
+  <div class="resturants">
+    <mat-card *ngFor="let item of resturants" (click)="goMenu(item)">
+      <div class="clicker">
+        <mat-card-header>
+          <mat-card-title>{{ item.name }}</mat-card-title>
+        </mat-card-header>
+      </div>
+      <div>
+        <mat-card-content>
+          <img src="http://10.186.116.56/mcdonalds/pics/{{ item.pic }}" />
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
+  <div class="about">Samer Alataona (c) {{year}} v2.1<br><code>Last Update: {{lastUpdate}}</code></div>
+</div>
+

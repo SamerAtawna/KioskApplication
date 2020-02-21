@@ -1,0 +1,18 @@
+.gbPayment,
+.bbPayment {
+  display: FLEX;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+mat-form-field {
+  width: 200px;
+}
+mat-radio-button {
+  margin: 15px;
+}
+.bluePaymentMethod {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}

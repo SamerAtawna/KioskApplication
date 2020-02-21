@@ -1,0 +1,38 @@
+  <!-- <mat-form-field>
+    <input matInput placeholder="WWID" />
+  </mat-form-field> -->
+
+<div class="gbPayment" *ngIf="badge=='GB'">
+  <h2>נא להעביר כרטיס</h2>
+  <br>
+    <mat-form-field>
+    <input matInput #gb (blur)="onBlurGB($event)" (input)="processPayment(gb)"  placeholder="" size=40 [libFocus]="true"   placeholder="" size=40 />
+  </mat-form-field>
+</div>
+<div class="bbPayment"  *ngIf="badge=='BB'">
+    <h2>נא להעביר תג</h2>
+  <br>
+    <mat-form-field>
+    <input matInput #bb (blur)="onBlurBB($event)" (input)="processPayment(bb)"  placeholder="" size=40 [libFocus]="true" />
+  </mat-form-field>
+  <div class="bluePaymentMethod">
+    <p>
+      סוג חיוב
+    </p>
+    <mat-radio-group dir="rtl" aria-label="Select an option" (change)="setGuestMode($event)" color="primary">
+          <mat-radio-button value="1" checked> רגיל</mat-radio-button>
+          <mat-radio-button value="Personal">אורח פרטי </mat-radio-button>
+          <mat-radio-button value="BusinessMeeting">אורח מחלקה</mat-radio-button>
+        </mat-radio-group>
+  </div>
+</div>
+<ngx-spinner
+  bdOpacity="0.9"
+  bdColor="#333"
+  size="large"
+  color="#fff"
+  type="timer"
+  [fullScreen]="true"
+>
+  <p style="color: white">נא להמתין</p>
+</ngx-spinner>
